@@ -31,7 +31,7 @@ class.colors <- c("ExN"="#E76BF3",
                   "VLMC"="#B2DF8A",
                   "OPC"="#A6CEE3")
 subclass.colors <- c("L2_3"="#1F77B4FF","L4"="#E377C2FF","L5"="#D62728FF","L6"="#6677d4",
-                     "NP SUB"= "#720ba9","L2_3 RSP"="#FF7F0EFF","L4RSP"="#2CA02CFF",
+                     "NP SUB"= "#720ba9","L2_3 RSP"="#FF7F0EFF","L4 RSP"="#2CA02CFF",
                      "Pvalb"="#17BECFFF","Sst"="#b7950b","Lamp5"="#98DF8AFF", "Sncg"="#FF9896FF","Vip"="#411eee",
                      "Oligo"="#da5e0e", "Astro"="#9EDAE5FF","Microglia"="#6495ED","OPC"="#FFBB78FF", 
                      "Endo"="#8C564BFF","VLMC"="#C49C94FF")
@@ -84,7 +84,7 @@ DefaultAssay(sor.hc) <- "Xenium"
 
 pdf("figs/ne-spatial-viz-sor-hc.pdf", width = 12, height = 13)
 ImageFeaturePlot(sor.hc, features = "neuroestimator_activity", 
-                 fov = paste0("fov.",c("",2:8)),cols = c("gray95", "firebrick3"),
+                 fov = c("fov",paste0("fov.",c(2:8))),cols = c("gray95", "firebrick3"),
                  size =2, scale = "all",
                  border.size = NA, dark.background = F) 
 dev.off()
@@ -92,9 +92,9 @@ dev.off()
 tau.ctrl <- AddMetaData(object = tau.ctrl, metadata = tau.ctrl.act, col.name = "neuroestimator_activity")
 DefaultAssay(tau.ctrl) <- "Xenium"
 
-pdf("figs/ne-spatial-viz-tau-hc.pdf", width = 12, height = 8)
+pdf("figs/ne-spatial-viz-tau-hc.pdf", width = 12, height = 13)
 ImageFeaturePlot(tau.ctrl, features = "neuroestimator_activity", 
-                 fov = paste0("fov.",c("",2:7)),cols = c("gray95", "firebrick3"),
+                 fov = c("fov",paste0("fov.",c(2:7))),cols = c("gray95", "firebrick3"),
                  size =1.5, scale = "all",
                  border.size = NA, dark.background = F) 
 dev.off()
@@ -116,6 +116,7 @@ ne.res %>% group_by(condition, class, experiment) %>%
 ##    by class
 p1 <- ne.res %>%
   filter(experiment == "SOR-HC") %>%
+  mutate(class = factor(class, levels = names(class.colors))) %>%
   ggplot(aes(x = condition, y = predicted_activity)) +
   geom_violin(aes(fill = class), show.legend = F) + 
   geom_boxplot(width = 0.2, fill = "white", outlier.size = 0.3) +
@@ -125,6 +126,7 @@ p1 <- ne.res %>%
   labs(x="", y="NEUROeSTIMator predicted activity")
 p2 <- ne.res %>%
   filter(experiment != "SOR-HC") %>%
+  mutate(class = factor(class, levels = names(class.colors))) %>%
   ggplot(aes(x = condition, y = predicted_activity)) +
   geom_violin(aes(fill = class), show.legend = F) + 
   geom_boxplot(width = 0.2, fill = "white", outlier.size = 0.3) +
@@ -139,6 +141,7 @@ dev.off()
 ##    by subclass
 p12 <- ne.res %>%
   filter(experiment == "SOR-HC") %>%
+  mutate(celltype = factor(celltype, levels = names(subclass.colors))) %>%
   ggplot(aes(x = condition, y = predicted_activity)) +
   geom_violin(aes(fill = celltype), show.legend = F) + 
   geom_boxplot(width = 0.2, fill = "white", outlier.size = 0.3) +
@@ -148,6 +151,7 @@ p12 <- ne.res %>%
   labs(x="", y="NEUROeSTIMator predicted activity")
 p22 <- ne.res %>%
   filter(experiment != "SOR-HC") %>%
+  mutate(celltype = factor(celltype, levels = names(subclass.colors))) %>%
   ggplot(aes(x = condition, y = predicted_activity)) +
   geom_violin(aes(fill = celltype), show.legend = F) + 
   geom_boxplot(width = 0.2, fill = "white", outlier.size = 0.3) +
@@ -199,7 +203,7 @@ p50 <- ne.LR.res %>%
   mutate(sig = case_when(pval < 0.001 ~ "***",
                          pval < 0.01 ~ "**",
                          pval < 0.05 ~ "*")) %>%
-  ggplot(aes(x = Estimate, y = name, color = name,
+  ggplot(aes(x = Estimate, y = factor(name,levels = names(class.colors)[8:1]), color = name,
              alpha = !is.na(sig))) +
   geom_vline(xintercept = 0, color = "red",linetype=2) +
   geom_point(show.legend = F) + 
@@ -217,7 +221,7 @@ p51 <- ne.LR.res %>%
   mutate(sig = case_when(pval < 0.001 ~ "***",
                          pval < 0.01 ~ "**",
                          pval < 0.05 ~ "*")) %>%
-  ggplot(aes(x = Estimate, y = name, color = name,
+  ggplot(aes(x = Estimate, y = factor(name,levels = names(subclass.colors)[18:1]), color = name,
              alpha = !is.na(sig))) +
   geom_vline(xintercept = 0, color = "red",linetype=2) +
   geom_point(show.legend = F) + 
